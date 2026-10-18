@@ -33,6 +33,7 @@ main{background:rgba(21,26,48,.82);backdrop-filter:blur(8px);--card:transparent;
 .mission .lbl small{display:block;color:#3fae82;font-size:10px}
 .mission .pts{font-size:24px;font-weight:700;text-shadow:0 0 8px rgba(93,255,180,.6)}
 .mission .pts small{font-size:12px;opacity:.7}
+.mission .best{font-size:12px}
 .score{display:inline-block;transition:transform .2s}
 .score.pop{transform:scale(1.35)}
 .q{font-size:16px;font-weight:600;margin:0 0 14px}
@@ -54,6 +55,7 @@ button.opt:disabled{cursor:default}
 .res{text-align:center;animation:fade .5s}
 .res .emoji{font-size:64px;animation:bounce 1s infinite alternate}
 .res .big{font-size:32px;font-weight:700;margin:6px 0}
+.res .record{font-weight:700;color:#5dffb4}
 @keyframes bounce{to{transform:translateY(-10px) rotate(6deg)}}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}}
 .fade{animation:fade .3s}
@@ -63,7 +65,7 @@ button.opt:disabled{cursor:default}
 <div class="stars"></div><div class="planet"></div><div class="planet moon"></div><div class="rocket">🚀</div>
 <div class="hero"><h1>Space Exploration Quiz</h1><p>10 questions to test your cosmic knowledge. Ready for launch?</p></div>
 <main>
-<div class="mission" role="status"><span class="led"></span><div class="lbl">Mission Control<small>Mission points</small></div><div class="pts"><span class="score" id="score">0</span><small> / 10</small></div><div class="mbar" role="progressbar" aria-label="Quiz progress"><i id="bar"></i></div></div>
+<div class="mission" role="status"><span class="led"></span><div class="lbl">Mission Control<small>Mission points</small></div><div class="pts"><span class="score" id="score">0</span><small> / 10</small></div><div class="best">Best: <span id="best">0</span></div><div class="mbar" role="progressbar" aria-label="Quiz progress"><i id="bar"></i></div></div>
 <div id="view"></div>
 </main>
 <script>
@@ -78,6 +80,12 @@ const Q=[
 ["Who was the first woman in space?",["Sally Ride","Valentina Tereshkova","Mae Jemison","Peggy Whitson"],1,"Valentina Tereshkova orbited Earth 48 times aboard Vostok 6 in 1963."],
 ["Which probe left the solar system first, entering interstellar space?",["Voyager 1","Pioneer 10","New Horizons","Cassini"],0,"Voyager 1 entered interstellar space in 2012 after crossing the heliosphere."],
 ["How long does light from the Sun take to reach Earth?",["8 seconds","8 minutes","8 hours","8 days"],1,"Sunlight takes about eight minutes and 20 seconds to reach Earth."]];
+function loadBest(){
+ try{
+  const saved=localStorage.getItem("spaceQuizBest"),value=Number(saved);
+  return saved!==null&&Number.isInteger(value)&&value>=0&&value<=Q.length?value:0;
+ }catch{return 0}
+}
 function shuffled(items){
  const result=items.slice();
  for(let n=result.length-1;n>0;n--){const k=Math.floor(Math.random()*(n+1));[result[n],result[k]]=[result[k],result[n]]}
@@ -86,8 +94,9 @@ function shuffled(items){
 function newRun(){
  return shuffled(Q).map(([q,o,a,fact])=>{const order=shuffled(o.map((_,index)=>index));return [q,order.map(index=>o[index]),order.indexOf(a),fact]});
 }
-let i=0,s=0,run=newRun();
+let i=0,s=0,best=loadBest(),run=newRun();
 const $=id=>document.getElementById(id),view=$("view");
+$("best").textContent=best;
 function render(){
  $("bar").style.width=(i/run.length*100)+"%";
  const [q,o,a,fact]=run[i];
@@ -107,8 +116,14 @@ function render(){
 const box2=()=>view.querySelector(".opts");
 function finish(){
  $("bar").style.width="100%";
+ const isNewRecord=s>best;
+ if(isNewRecord){
+  best=s;
+  try{localStorage.setItem("spaceQuizBest",String(best))}catch{}
+ }
+ $("best").textContent=best;
  const p=s/run.length,[e,m]=p==1?["🏆","Perfect! Mission commander!"]:p>=.8?["🚀","Stellar work!"]:p>=.6?["🌟","Nice orbit!"]:p>=.4?["🛰️","Keep exploring!"]:["☄️","Crash landing — try again!"];
- view.innerHTML=`<div class="res"><div class="emoji">${e}</div><div class="big">${s} / ${run.length}</div><p>${m}</p><button class="again">Play again</button></div>`;
+ view.innerHTML=`<div class="res"><div class="emoji">${e}</div><div class="big">${s} / ${run.length}</div><p>${m}</p><p class="record">${isNewRecord?"New record!":""}</p><p>Best score: ${best}</p><button class="again">Play again</button></div>`;
  view.querySelector(".again").onclick=()=>{i=0;s=0;run=newRun();$("score").textContent=0;render();box2().firstChild.focus()};
 }
 render();
