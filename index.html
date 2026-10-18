@@ -86,13 +86,21 @@ function loadBest(){
   return saved!==null&&Number.isInteger(value)&&value>=0&&value<=Q.length?value:0;
  }catch{return 0}
 }
-let i=0,s=0,best=loadBest();
+function shuffled(items){
+ const result=items.slice();
+ for(let n=result.length-1;n>0;n--){const k=Math.floor(Math.random()*(n+1));[result[n],result[k]]=[result[k],result[n]]}
+ return result;
+}
+function newRun(){
+ return shuffled(Q).map(([q,o,a,fact])=>{const order=shuffled(o.map((_,index)=>index));return [q,order.map(index=>o[index]),order.indexOf(a),fact]});
+}
+let i=0,s=0,best=loadBest(),run=newRun();
 const $=id=>document.getElementById(id),view=$("view");
 $("best").textContent=best;
 function render(){
- $("bar").style.width=(i/Q.length*100)+"%";
- const [q,o,a,fact]=Q[i];
- view.innerHTML=`<div class="fade"><p class="q"></p><div class="opts"></div><div class="fb" aria-live="polite"></div><div class="fact" hidden></div><button class="next" hidden>${i==Q.length-1?"See results":"Next →"}</button></div>`;
+ $("bar").style.width=(i/run.length*100)+"%";
+ const [q,o,a,fact]=run[i];
+ view.innerHTML=`<div class="fade"><p class="q"></p><div class="opts"></div><div class="fb" aria-live="polite"></div><div class="fact" hidden></div><button class="next" hidden>${i==run.length-1?"See results":"Next →"}</button></div>`;
  view.querySelector(".q").textContent=q;
  const box=view.querySelector(".opts"),fb=view.querySelector(".fb"),factEl=view.querySelector(".fact"),nx=view.querySelector(".next");
  o.forEach((t,k)=>{const b=document.createElement("button");b.className="opt";b.textContent=t;
@@ -103,7 +111,7 @@ function render(){
    factEl.textContent=fact;factEl.hidden=false;
    nx.hidden=false;nx.focus();
   };box.appendChild(b)});
- nx.onclick=()=>{i++;if(i<Q.length){render();box2().firstChild.focus()}else{finish();view.querySelector(".again").focus()}};
+ nx.onclick=()=>{i++;if(i<run.length){render();box2().firstChild.focus()}else{finish();view.querySelector(".again").focus()}};
 }
 const box2=()=>view.querySelector(".opts");
 function finish(){
@@ -114,9 +122,9 @@ function finish(){
   try{localStorage.setItem("spaceQuizBest",String(best))}catch{}
  }
  $("best").textContent=best;
- const p=s/Q.length,[e,m]=p==1?["🏆","Perfect! Mission commander!"]:p>=.8?["🚀","Stellar work!"]:p>=.6?["🌟","Nice orbit!"]:p>=.4?["🛰️","Keep exploring!"]:["☄️","Crash landing — try again!"];
- view.innerHTML=`<div class="res"><div class="emoji">${e}</div><div class="big">${s} / ${Q.length}</div><p>${m}</p><p class="record">${isNewRecord?"New record!":""}</p><p>Best score: ${best}</p><button class="again">Play again</button></div>`;
- view.querySelector(".again").onclick=()=>{i=0;s=0;$("score").textContent=0;render();box2().firstChild.focus()};
+ const p=s/run.length,[e,m]=p==1?["🏆","Perfect! Mission commander!"]:p>=.8?["🚀","Stellar work!"]:p>=.6?["🌟","Nice orbit!"]:p>=.4?["🛰️","Keep exploring!"]:["☄️","Crash landing — try again!"];
+ view.innerHTML=`<div class="res"><div class="emoji">${e}</div><div class="big">${s} / ${run.length}</div><p>${m}</p><p class="record">${isNewRecord?"New record!":""}</p><p>Best score: ${best}</p><button class="again">Play again</button></div>`;
+ view.querySelector(".again").onclick=()=>{i=0;s=0;run=newRun();$("score").textContent=0;render();box2().firstChild.focus()};
 }
 render();
 </script>
