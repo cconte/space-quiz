@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Space Exploration Quiz</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--text:#1b2033;--muted:#6b7390;--border:#dde2f0;--accent:#5b5bf0;--good:#16a34a;--goodbg:#dcfce7;--bad:#dc2626;--badbg:#fee2e2;--track:#e6e9f5}
+@media (prefers-color-scheme:dark){:root{--bg:#0b0e1c;--card:#151a30;--text:#e8ebf7;--muted:#9aa3c4;--border:#2a3154;--accent:#8b8bff;--good:#4ade80;--goodbg:#12361f;--bad:#f87171;--badbg:#401818;--track:#232a4a}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{width:100%;max-width:440px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:0 10px 30px rgba(20,30,80,.12)}
+body{flex-direction:column;gap:18px;position:relative;overflow-x:hidden;background:radial-gradient(ellipse at 20% 10%,#2b1b5e 0,transparent 50%),radial-gradient(ellipse at 85% 90%,#0e3a5f 0,transparent 55%),#05060f;color:#e8ebf7}
+.stars,.stars::after{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(1.5px 1.5px at 10% 20%,#fff,transparent),radial-gradient(1px 1px at 30% 70%,#fff,transparent),radial-gradient(2px 2px at 55% 35%,#cfe3ff,transparent),radial-gradient(1px 1px at 75% 15%,#fff,transparent),radial-gradient(1.5px 1.5px at 90% 60%,#ffe9c4,transparent),radial-gradient(1px 1px at 20% 90%,#fff,transparent),radial-gradient(1.5px 1.5px at 65% 85%,#fff,transparent),radial-gradient(1px 1px at 45% 8%,#fff,transparent);background-size:340px 340px;animation:twinkle 4s ease-in-out infinite alternate}
+.stars::after{content:"";background-size:230px 230px;background-position:70px 40px;animation-delay:-2s}
+@keyframes twinkle{from{opacity:.35}to{opacity:1}}
+.planet{position:fixed;right:-90px;bottom:-90px;width:300px;height:300px;border-radius:50%;z-index:0;pointer-events:none;background:radial-gradient(circle at 30% 30%,#ffb27a,#c4562b 55%,#4a1a10);box-shadow:0 0 60px rgba(255,120,60,.35)}
+.planet.moon{right:auto;left:-40px;top:60px;bottom:auto;width:110px;height:110px;background:radial-gradient(circle at 35% 35%,#f1f1f5,#9a9aae 60%,#4b4b5e);box-shadow:0 0 30px rgba(200,200,255,.25)}
+.rocket{position:fixed;font-size:34px;z-index:0;pointer-events:none;top:75%;left:-60px;animation:fly 18s linear infinite}
+@keyframes fly{to{transform:translate(120vw,-70vh) rotate(0)}}
+.hero,main{position:relative;z-index:1}
+.hero{text-align:center;max-width:440px}
+.hero h1{font-size:34px;line-height:1.15;margin:0;font-weight:800;letter-spacing:-.5px;background:linear-gradient(90deg,#8fb4ff,#e07bff,#ffb86b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{margin:8px 0 0;color:#aab3d6}
+main{background:rgba(21,26,48,.82);backdrop-filter:blur(8px);--card:transparent;--text:#e8ebf7;--muted:#9aa3c4;--border:#2f3763;--accent:#8b8bff;--good:#4ade80;--goodbg:#12361f;--bad:#f87171;--badbg:#401818;--track:#232a4a;color:var(--text)}
+.mission{display:flex;align-items:center;gap:12px;padding:10px 14px;margin-bottom:14px;border:1px solid #2f6b5a;border-radius:10px;background:linear-gradient(180deg,#07130f,#0b1e18);font-family:ui-monospace,Consolas,monospace;color:#5dffb4;box-shadow:inset 0 0 12px rgba(93,255,180,.12)}
+.mission{flex-wrap:wrap}
+.mbar{flex-basis:100%;height:8px;border-radius:99px;background:#0e2a21;overflow:hidden}
+.mbar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#5dffb4,#5bc8ff,#d946ef);box-shadow:0 0 8px rgba(93,255,180,.6);transition:width .4s ease}
+.mission .led{width:10px;height:10px;border-radius:50%;background:#5dffb4;box-shadow:0 0 8px #5dffb4;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+.mission .lbl{flex:1;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;line-height:1.3}
+.mission .lbl small{display:block;color:#3fae82;font-size:10px}
+.mission .pts{font-size:24px;font-weight:700;text-shadow:0 0 8px rgba(93,255,180,.6)}
+.mission .pts small{font-size:12px;opacity:.7}
+.score{display:inline-block;transition:transform .2s}
+.score.pop{transform:scale(1.35)}
+.q{font-size:16px;font-weight:600;margin:0 0 14px}
+.opts{display:grid;gap:10px}
+button.opt{font:inherit;text-align:left;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;background:transparent;color:var(--text);cursor:pointer;transition:border-color .15s,background .15s,transform .1s}
+button.opt:hover:not(:disabled){border-color:var(--accent);transform:translateX(2px)}
+button.opt:disabled{cursor:default}
+.opt.correct{background:var(--goodbg);border-color:var(--good);animation:pulse .5s}
+.opt.wrong{background:var(--badbg);border-color:var(--bad);animation:shake .45s}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04);box-shadow:0 0 18px var(--good)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.fb{min-height:22px;margin-top:14px;font-weight:600;font-size:14px}
+.fb.good{color:var(--good)}.fb.bad{color:var(--bad)}
+.next,.again{font:inherit;font-weight:600;margin-top:12px;width:100%;padding:11px;border:0;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer}
+.next:hover,.again:hover{filter:brightness(1.1)}
+.next[hidden]{display:none}
+.res{text-align:center;animation:fade .5s}
+.res .emoji{font-size:64px;animation:bounce 1s infinite alternate}
+.res .big{font-size:32px;font-weight:700;margin:6px 0}
+@keyframes bounce{to{transform:translateY(-10px) rotate(6deg)}}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}}
+.fade{animation:fade .3s}
+</style>
+</head>
+<body>
+<div class="stars"></div><div class="planet"></div><div class="planet moon"></div><div class="rocket">🚀</div>
+<div class="hero"><h1>Space Exploration Quiz</h1><p>10 questions to test your cosmic knowledge. Ready for launch?</p></div>
+<main>
+<div class="mission" role="status"><span class="led"></span><div class="lbl">Mission Control<small>Mission points</small></div><div class="pts"><span class="score" id="score">0</span><small> / 10</small></div><div class="mbar" role="progressbar" aria-label="Quiz progress"><i id="bar"></i></div></div>
+<div id="view"></div>
+</main>
+<script>
+const Q=[
+["Who was the first human in space?",["Neil Armstrong","Yuri Gagarin","Buzz Aldrin","Alan Shepard"],1],
+["Which year did Apollo 11 land on the Moon?",["1965","1969","1972","1975"],1],
+["Which planet has the Great Red Spot?",["Mars","Saturn","Jupiter","Neptune"],2],
+["What was the first artificial satellite?",["Explorer 1","Vostok 1","Sputnik 1","Telstar"],2],
+["Which rover landed on Mars in 2021?",["Curiosity","Perseverance","Opportunity","Spirit"],1],
+["What is the largest moon of Saturn?",["Titan","Europa","Io","Enceladus"],0],
+["Which telescope launched in 2021 to observe infrared?",["Hubble","Kepler","James Webb","Spitzer"],2],
+["Who was the first woman in space?",["Sally Ride","Valentina Tereshkova","Mae Jemison","Peggy Whitson"],1],
+["Which probe left the solar system first, entering interstellar space?",["Voyager 1","Pioneer 10","New Horizons","Cassini"],0],
+["How long does light from the Sun take to reach Earth?",["8 seconds","8 minutes","8 hours","8 days"],1]];
+let i=0,s=0;
+const $=id=>document.getElementById(id),view=$("view");
+function render(){
+ $("bar").style.width=(i/Q.length*100)+"%";
+ const [q,o,a]=Q[i];
+ view.innerHTML=`<div class="fade"><p class="q"></p><div class="opts"></div><div class="fb" aria-live="polite"></div><button class="next" hidden>${i==Q.length-1?"See results":"Next →"}</button></div>`;
+ view.querySelector(".q").textContent=q;
+ const box=view.querySelector(".opts"),fb=view.querySelector(".fb"),nx=view.querySelector(".next");
+ o.forEach((t,k)=>{const b=document.createElement("button");b.className="opt";b.textContent=t;
+  b.onclick=()=>{
+   box.querySelectorAll("button").forEach(x=>x.disabled=true);
+   if(k===a){b.classList.add("correct");s++;fb.textContent="✅ Correct!";fb.className="fb good";const sc=$("score");sc.textContent=s;sc.classList.add("pop");setTimeout(()=>sc.classList.remove("pop"),200)}
+   else{b.classList.add("wrong");box.children[a].classList.add("correct");fb.textContent="❌ Not quite — answer: "+o[a];fb.className="fb bad"}
+   nx.hidden=false;nx.focus();
+  };box.appendChild(b)});
+ nx.onclick=()=>{i++;if(i<Q.length){render();box2().firstChild.focus()}else{finish();view.querySelector(".again").focus()}};
+}
+const box2=()=>view.querySelector(".opts");
+function finish(){
+ $("bar").style.width="100%";
+ const p=s/Q.length,[e,m]=p==1?["🏆","Perfect! Mission commander!"]:p>=.8?["🚀","Stellar work!"]:p>=.6?["🌟","Nice orbit!"]:p>=.4?["🛰️","Keep exploring!"]:["☄️","Crash landing — try again!"];
+ view.innerHTML=`<div class="res"><div class="emoji">${e}</div><div class="big">${s} / ${Q.length}</div><p>${m}</p><button class="again">Play again</button></div>`;
+ view.querySelector(".again").onclick=()=>{i=0;s=0;$("score").textContent=0;render();box2().firstChild.focus()};
+}
+render();
+</script>
+</body>
+</html>
